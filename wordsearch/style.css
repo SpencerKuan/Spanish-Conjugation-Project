@@ -50,7 +50,7 @@ body {
     justify-content: space-between;
     width: 100%;
     padding: 20px;
-    background-color: #333;
+    background-color: rgb(125, 14, 101);
     color: #fff;
 }
 
@@ -67,7 +67,7 @@ body {
 #controls button {
     padding: 10px 20px;
     margin-left: 10px;
-    background-color: #333;
+    background-color: rgb(125, 14, 101);
     color: #fff;
     border: none;
     cursor: pointer;
@@ -110,7 +110,7 @@ main {
     width: 50%;
     height: 50%;
     background-color: #fff;
-    border: 2px solid #333;
+    border: 2px solid rgb(125, 14, 101);
 }
 
 /* Word list container */
