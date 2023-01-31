@@ -55,9 +55,7 @@ class wordGrid {
             x = Math.floor(Math.random() * this.cols);
             y = Math.floor(Math.random() * this.rows);
             dx = Math.floor(Math.random() * 2);
-            dy = Math.floor(Math.random() * 2);
-
-            if (dx === 0 && dy === 0) continue;
+            dy = 1 - dx;
 
             found = this.write(word, x, y, dx, dy);
             if (++i > maxIterations) return false;
@@ -67,10 +65,12 @@ class wordGrid {
     }
 
     draw(){
+        background(0);
+
         textSize(9);
         textAlign(CENTER, CENTER);
 
-        stroke(255);
+        stroke(0);
         for(let i = 0; i < this.rows; i++){
             let y = i * this.cellSize;
             line(0, y, this.cols * this.cellSize, y);
@@ -85,8 +85,16 @@ class wordGrid {
                 let x = j * this.cellSize;
                 let y = i * this.cellSize;
 
-                fill(255);
-                text(this.grid[i * this.cols + j], x + this.cellSize/2*1.5, y + this.cellSize/2*1.5);
+                let letter = this.grid[i * this.cols + j];
+                if (letter != " " && letter){
+                    fill(255);
+                    rect(x, y, this.cellSize, this.cellSize);
+
+                    fill(0);
+                    text(this.grid[i * this.cols + j], x + this.cellSize/2*1.5, y + this.cellSize/2*1.5);
+                }
+
+                
             }
         }
     }
