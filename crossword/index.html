@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crossword</title>
+
+    <link rel="stylesheet" href="style.css">
+    
+</head>
+<body>
+    <div class="app">
+        <div id="top">
+            <h1>Reflexive Crossword</h1>
+            <div id="controls">
+                <button id="generate" onclick="generate()">Generate</button>
+                <!-- <button id="solve" onclick="solve()">Solve</button> -->
+            </div>
+        </div>        
+    
+        <div class="content">
+            <div id="wordList">
+                <h3>Word List</h3>
+                <ol id="wordListItems">
+                    <!-- list items will be added dynamically via JavaScript -->
+                </ol>
+            </div>
+
+            <!-- canvas goes here -->
+            <main></main>
+        </div>
+
+        
+<!-- 
+        <div class="Instructions">
+            <h2>Instructions</h2>
+            <p>Click on the Generate button to generate a new crossword puzzle.</p>
+            <p>Click on the Solve button to solve the puzzle.</p>
+        </div> -->
+    </div>
+    
+
+
+    <script src="p5.min.js"></script>
+    <script src="index.js"></script>
+</body>
+</html>
