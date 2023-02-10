@@ -2,8 +2,42 @@
 let reflexive;
 let pick = list => list[Math.floor(Math.random()*list.length)];
 
+var positionCounter = 0;
 
-class wordGrid {
+class Grid {
+    constructor(generator, size = 20, cellSize = 600 / size) {
+        this.rows = size;
+        this.cols = size;
+        this.grid = [];
+        this.cellSize = cellSize;
+
+        this.createGrid(generator);
+    }
+
+    createGrid(generator = () => " "){
+        this.grid = [];
+        for(let i = 0; i < this.rows; i++){
+            for(let j = 0; j < this.cols; j++){
+                this.grid.push(generator(i, j));
+            }
+        }
+    }
+
+    set(x, y, value){
+        this.grid[y * this.cols + x] = value;
+    }
+
+    write(word, x, y, dx, dy){
+        for(let i = 0; i < word.length; i++){
+            this.set(x + i * dx, y + i * dy, word[i])
+        }
+
+        console.log("written", word, x, y, dx, dy);
+        return true;
+    }
+}
+
+class wordGrid  {
     constructor(generator, size = 20, cellSize = 600 / size) {
         this.rows = size;
         this.cols = size;
@@ -24,15 +58,19 @@ class wordGrid {
 
     write(word, x, y, dx, dy, override = false){
         let isSameOrEmpty = true;
+        let intersection = false;
+
         for(let i = 0; i < word.length; i++) {
             const letter = this.grid[(y + i * dy) * this.cols + x + i * dx];
-            isSameOrEmpty = isSameOrEmpty && (letter === " " || letter === word[i]);
+            isSameOrEmpty = isSameOrEmpty && (letter === " " || letter === word[i] && letter !== "|");
+            intersection = intersection || (letter !== " ");
         }
 
         if (
             (x + word.length * dx > this.cols || x + word.length * dx < 0) || 
             (y + word.length * dy > this.rows || y + word.length * dy < 0) || 
-            !isSameOrEmpty && !override
+            !isSameOrEmpty && !override ||
+            !intersection && !override
         ) return false;
 
         for(let i = 0; i < word.length; i++){
@@ -58,7 +96,15 @@ class wordGrid {
             dy = 1 - dx;
 
             found = this.write(word, x, y, dx, dy);
+
             if (++i > maxIterations) return false;
+        }
+
+        if (found) {
+            numberGrid.set(x + dx, y + dy, {
+                number: ++positionCounter,
+                direction : dx === 1 ? "horizontal" : "vertical"
+            });
         }
 
         return {x, y, dx, dy};
@@ -67,10 +113,11 @@ class wordGrid {
     draw(){
         background(0);
 
-        textSize(9);
+        textSize(20);
         textAlign(CENTER, CENTER);
 
         stroke(0);
+
         for(let i = 0; i < this.rows; i++){
             let y = i * this.cellSize;
             line(0, y, this.cols * this.cellSize, y);
@@ -86,15 +133,24 @@ class wordGrid {
                 let y = i * this.cellSize;
 
                 let letter = this.grid[i * this.cols + j];
-                if (letter != " " && letter){
+                if (letter != " " && letter && letter != "|"){
+                    stroke(0);
                     fill(255);
                     rect(x, y, this.cellSize, this.cellSize);
 
-                    fill(0);
-                    text(this.grid[i * this.cols + j], x + this.cellSize/2*1.5, y + this.cellSize/2*1.5);
-                }
+                    const number = numberGrid.grid[i * this.cols + j]?.number;
 
-                
+                    
+                    noStroke();
+                    textSize(9);
+                    fill(0);
+
+                    if (number) text(number, x - this.cellSize/4, y - this.cellSize/4, this.cellSize, this.cellSize);
+
+                    textSize(20);
+                    fill(200);
+                    // text(letter, x, y, this.cellSize, this.cellSize);
+                }
             }
         }
     }
@@ -107,6 +163,8 @@ class wordGrid {
 // word grid
 const grid = new wordGrid();
 
+const numberGrid = new Grid();
+
 // words to add
 var words = [];
 
@@ -117,6 +175,7 @@ let wordsAdded = [];
 const tasks = new Set();
 
 function generate(){
+    positionCounter = 0;
 
     let num = 0;
     words = reflexive.reflexiveWords.map(x => {
@@ -124,23 +183,35 @@ function generate(){
         const word = reflexive.conjugateReflexive(x.word, pronoun, x.irregular).replaceAll(" ", "");
 
         return {
-            word: Array(word.length).fill(++num),
-            hint: reflexive.pronounMap[pronoun].english + "; " + x.english.join(" ")
+            word: "|" + word + "|",
+            hint: reflexive.pronounMap[pronoun].english + "; " + x.english.join(" "),
         }
     });
     wordsAdded = [];
 
+    numberGrid.createGrid((i, j) => null);
     grid.createGrid();
 
     const propogate = createSpreadTask(propogateWords);
     propogate.then(x => {
-        console.log("done", x);
-
         renderWordList(x);
-
-        // replace each empty square with a random letter
-        // grid.grid = grid.grid.map(x => x === " " ? pick("abcdefghijklmnopqrstuvwxyz".split('')) : x);
     })
+
+
+    // seed the board!!! (add the first word)
+    const wordIndex = 0;
+    let word = words[wordIndex];
+    wordsAdded.push(word);
+    words.splice(wordIndex, 1);
+
+    grid.write(word.word, 5, 5, 1, 0, true);
+
+    numberGrid.set(5 + 1, 5, {
+        number: ++positionCounter,
+        direction : "horizontal"
+    });
+
+    console.log(numberGrid);
 }
 
 let canvas;
@@ -163,7 +234,7 @@ let propogateWords = (() => {
             if (words.length){
                 let wordIndex = Math.floor(Math.random() * words.length);
                 let word = words[wordIndex];
-                let found = !!grid.findSpace(word.word, 10);
+                let found = grid.findSpace(word.word, 10);
             
                 if (found) {
                     wordsAdded.push(word);
@@ -176,11 +247,11 @@ let propogateWords = (() => {
     }
 })();
 
-
 tasks.add(function render(){
     background(0);
     grid.draw();
-})
+});
+
 
 function draw (){
     for(let task of tasks){
@@ -204,7 +275,10 @@ function renderWordList(words){
 
     words.forEach(word => {
         let li = document.createElement("li");
-        li.innerHTML = word.hint;
+
+        let text = word.hint;
+        li.innerHTML = text;
+
         element.appendChild(li);
     });
 }

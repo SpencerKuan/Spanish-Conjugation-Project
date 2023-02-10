@@ -94,7 +94,7 @@ const reflexiveList = (`
     casarse to get married (to)
     cortarse to cut onself, to get cut (hair)
     despedirse (e-i) to say goodbye to
-    despertarse (e-ie)to wake up
+    despertarse (e-ie) to wake up
     ducharse to take a shower
     enfermarse to get sick
     lastimarse to hurt oneself
